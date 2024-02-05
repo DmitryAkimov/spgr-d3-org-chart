@@ -4,21 +4,42 @@
     font-weight: bold;
 }
 
-.name {
-    color:#404040;
-    font-size:16px;
-    margin-top:4px;
+.department .manager {
+    font-size: small;        
+}
+
+.employee .name {
+    font-size: larger;
+}
+
+.employee .title {
+    font-size: smaller;
 }
 
 .department {
-    background-color: white;
+    background-color: whitesmoke;
     padding-top:0px;
     border-radius:10px;
-    border: .5px solid lightgray;
+    border: 1px solid lightgray;
 }
 
+.department .manager {
+    margin-top: 0.5em;
+}
 .depth0 {
     background-color: whitesmoke;
     padding-top:0px;
-    border:1px solid lightgray;
+    border:3px solid lightgray;
+}
+
+.depth1 {
+    background-color: rgb(197, 246, 197);
+    border:2px solid lightgray;
+}
+
+.employee {
+    background-color: white;
+    border-radius:20px;
+    border: 1px solid lightgray;
+    min-height: 50px;
 }

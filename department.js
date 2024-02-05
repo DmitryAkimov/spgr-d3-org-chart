@@ -11,39 +11,47 @@ function shortFio (source) {
     return source.replace(/(.+) (.).+ (.).+/, '$1 $2. $3.');
 }
 //=============================================================================
-function renderDept(d, i, arr, state) {
-    return `
-    <a href = "department.html?id=${d.data.id}">
-    <div class="department depth${d.depth}" style="height:${d.height}px;width:${d.width}px;">
-          
-          <div style="padding:5px; text-align:center">
-               <div class="name"> ${d.data.department} </div>
-               <div class="manager"> ${d.depth > 1 ? shortFio(d.data.manager) : d.data.manager}</div>
-
-          </div>     
-  </div>
-  </a>
-`
+function renderNode(d, i, arr, state) {
+    if (d.data.class=="department"){
+        return `
+        <div class="${d.data.class}  ${d.depth==0 ? 'depth0' : ''}" style="height:${d.height}px;width:${d.width}px;">
+            
+            <div style="padding:5px; text-align:center">
+                <div class="name"> ${d.data.name} </div>
+                <div class="manager"> ${d.data.title}</div>
+            </div>     
+        </div>
+        `}
+    else {return `
+            <div class="${d.data.class} style="height:${d.height}px;width:${d.width}px;> 
+            <div style="padding:5px; text-align:center">
+                <div class="name"> ${d.data.name} </div>
+                <div class="title"> ${d.data.title}</div>
+            </div>  
+            </div>`;}
 };
 //=============================================================================
 function nodeHeight (d) {
    // console.log (d);
-   if (d.depth==0) return 150
-   else return 100;
+//    if (d.depth==0) return 150
+//    else return 100;
+    return (d.data.class=="department") ? 100 : 75;
 }
 //=============================================================================
 // main
 //=============================================================================
+const departmentId =  window.location.search.replace( '?id=', ''); 
 d3
     //.csv( "dpt.csv" )  //  "https://raw.githubusercontent.com/bumbeishvili/sample-data/main/org.csv"
-    .csv('./data/departments.csv')
+    .csv(`./data/${departmentId}.csv`)
     .then((data) => {
+        //console.log(data);
         chart = new d3.OrgChart()
             .container(".chart-container")
-            .compact(false)
+            .compact(true)
             .data(data)
             .nodeHeight(nodeHeight)
-            .nodeContent(renderDept)
+            .nodeContent(renderNode)
             .duration(500)
             .render();
     });
