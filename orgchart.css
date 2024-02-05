@@ -1,0 +1,24 @@
+.department .name {
+    color: #111672;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.name {
+    color:#404040;
+    font-size:16px;
+    margin-top:4px;
+}
+
+.department {
+    background-color: white;
+    padding-top:0px;
+    border-radius:10px;
+    border: .5px solid lightgray;
+}
+
+.depth0 {
+    background-color: whitesmoke;
+    padding-top:0px;
+    border:1px solid lightgray;
+}
