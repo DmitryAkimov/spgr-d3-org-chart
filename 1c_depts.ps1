@@ -7,19 +7,31 @@ $database = 'Reporting';
 $csvPath = 'C:\dev\spgr-d3-org-chart\data';
 
 
-function GetSqlDataSet ([string] $sql ) {
-    $SqlConnection_dept = New-Object System.Data.SqlClient.SqlConnection
-    $SqlConnection_dept.ConnectionString = "Server=$server;Database=$database;Integrated Security=True"
-    $SqlCmd_dept = New-Object System.Data.SqlClient.SqlCommand
-    $SqlCmd_dept.CommandText = $sql
-    $SqlCmd_dept.Connection = $SqlConnection_dept
-    $SqlAdapter_dept = New-Object System.Data.SqlClient.SqlDataAdapter
-    $SqlAdapter_dept.SelectCommand = $SqlCmd_dept
-    $DataSet_dept = New-Object System.Data.DataSet
-    $SqlAdapter_dept.Fill($DataSet_dept)
-    $SqlConnection_dept.Close();
-    return $DataSet_dept;
+function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
+    $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
+    $sqlConnection.ConnectionString = "Server=$server;Database=$database;Integrated Security=True"
+    
+    $sqlCommand = New-Object System.Data.SqlClient.SqlCommand
+    $sqlCommand.CommandText = $sql
+    $sqlCommand.Connection = $sqlConnection
+    
+    $sqlAdapter = New-Object System.Data.SqlClient.SqlDataAdapter
+    $sqlAdapter.SelectCommand = $sqlCommand
+    
+    $ds = New-Object System.Data.DataSet
+    $sqlAdapter.Fill($ds)
+    $sqlConnection.Close();
+    
+    if($csvExportPath -ne $null) {
+         $ds.Tables[0] | Export-CSV -Path "$csvExportPath" -notypeinformation -Encoding UTF8 -Force
+    }
+    
+    return $ds;
 }
+
+    #--------------------------------------------------------------------------
+    #  MAIN
+    #--------------------------------------------------------------------------
     cls;
     $sql = "
     SELECT 
@@ -34,8 +46,8 @@ function GetSqlDataSet ([string] $sql ) {
     ORDER BY
 	    [Путь]
     ";
-    $ds = GetSqlDataSet($sql);
-    $ds.Tables[0] | Export-CSV "$csvPath\departments.csv" -notypeinformation -Encoding UTF8 -Force
+    $ds = GetSqlDataSet -sql $sql  -csvExportPath "$csvPath\departments.csv"
+    #$ds.Tables[0] | Export-CSV "$csvPath\departments.csv" -notypeinformation -Encoding UTF8 -Force
 
     $row_count_sql = $DataSet_dept.Tables.Rows.Count
     for ($i = 0; $i -lt $row_count_sql; $i++) {
@@ -43,7 +55,7 @@ function GetSqlDataSet ([string] $sql ) {
         # присваиваем данные столбцов переменным
         $departmentId = $ds.Tables.Rows[$i].id;
         Write-Host "$i = $departmentId";
-        #$departmentId = '0xA2CF00505601289111E8FEE8322D2240';
+        #$departmentId = 'A2CF00505601289111E8FEE8322D2240';
         $sql = "SELECT * FROM (
                 SELECT
 	                'department' as [class]
@@ -72,10 +84,23 @@ function GetSqlDataSet ([string] $sql ) {
                 ) as SRC ORDER BY class, name
                ";
         #Write-Host $sql;
-        $dsDept = GetSqlDataSet($sql);
-        $dsDept.Tables[0] | Export-CSV "$csvPath\$departmentId.csv" -notypeinformation -Encoding UTF8 -Force
+        GetSqlDataSet -sql $sql -csvExportPath "$csvPath\$departmentId.csv"
     }
+    #--------------------------------------------------------------------------
+    #  все люди
+    #--------------------------------------------------------------------------
+    $sql = "
+        SELECT 
+          [КодФизлица] as id
+          ,CONVERT(nvarchar(100), [ПодразделениеКод], 2) as parentId
+	      ,[ФИО] as [name]
+          ,[Подразделение] as department
+          ,[Должность] as titel
+          ,[СборЗагрузки] as isTimesheet
+	      ,[Филиал] as branch
+        FROM
+	        [v1СЗУП_КлассификаторСотрудников_Текущий]
+        ";
 
-
-
+    GetSqlDataSet -sql $sql -csvExportPath "$csvPath\staff.csv"
  
