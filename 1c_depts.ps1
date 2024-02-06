@@ -39,7 +39,7 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
 	    , IIF( [РодительКод] = 0x0, '', CONVERT (nvarchar(100), [РодительКод], 2)) as parentId
 	    ,[Подразделение] as department
 	    ,[v1СЗУП_РуководителиПодразделений].ФИО as manager
-	    ,dbo.fnShortFio([v1СЗУП_РуководителиПодразделений].ФИО) as manager_io
+	    ,[v1СЗУП_РуководителиПодразделений].КодФизЛица as managerEid
     FROM
 	    [fn1СЗУП_СтруктураПредприятия] (default) [СтруктураПредприятия]
 	    LEFT JOIN [v1СЗУП_РуководителиПодразделений] ON [СтруктураПредприятия].Код=v1СЗУП_РуководителиПодразделений.СтруктураПредприятияКод
@@ -84,7 +84,7 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
                 ) as SRC ORDER BY class, name
                ";
         #Write-Host $sql;
-        GetSqlDataSet -sql $sql -csvExportPath "$csvPath\$departmentId.csv"
+        #GetSqlDataSet -sql $sql -csvExportPath "$csvPath\$departmentId.csv"
     }
     #--------------------------------------------------------------------------
     #  все люди
