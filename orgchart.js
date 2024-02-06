@@ -62,6 +62,9 @@ function filterDepartments (arr, rootNodeData) {
     departments.forEach(element => {
         if ( element.parentId==rootNodeData.id ) {
             arr.push(  element );
+            // фильтруем сотрудников департамента и добавдяем к массиву
+            stf = staff.filter ( employee => employee.parentId==element.id);
+            arr = arr.concat (stf);
             filterDepartments (arr, element);
         };
     }); 
@@ -112,7 +115,7 @@ function mainOrgchart(rootNodeData=null){
         root.parentId = '';
         data.push ( root );
         filterDepartments(data, rootNodeData );
-        filterStaff(data);
+        //filterStaff(data);
         chart
         .data(data)
         .render();
