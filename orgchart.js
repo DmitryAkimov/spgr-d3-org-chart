@@ -52,49 +52,83 @@ function isEmpty( val ) {
     return false;
 }
 //=============================================================================
-function nodeContent(d, i, arr, state) {
-//     return `
-//     <a href = "department.html?id=${d.data.id}">
-//     <div class="department depth${d.depth}" style="height:${d.height}px;width:${d.width}px;">
-          
-//           <div style="padding:5px; text-align:center">
-//                <div class="name"> ${d.data.department} </div>
-//                <div class="manager"> ${d.depth > 1 ? shortFio(d.data.manager) : d.data.manager}</div>
+function filterChart(value) {
+    // Get input value
+    if (isEmpty(value)) {return;}
+    
+    // Clear previous higlighting
+    chart.clearHighlighting();
 
-//           </div>     
-//   </div>
-//   </a>
-//     `;
-    if (d.data.class=="department") {return `
-            <div class="card ${d.depth == 0 ? 'text-bg-success' : ''}" style="height:${d.height}px;width:${d.width}px;" > 
+    // Get chart nodes
+    const data = chart.data();
+
+    // Mark all previously expanded nodes for collapse
+    data.forEach((d) => (d._expanded = false));
+
+    // Loop over data and check if input value matches any name
+    data.forEach((d) => {
+      if (value != '' && d.name.toLowerCase().includes(value.toLowerCase())) {
+        // If matches, mark node as highlighted
+        d._highlighted = true;
+        d._expanded = true;
+      }
+    });
+
+    // Update data and rerender graph
+    chart.data(data).render().fit();
+
+    console.log('filtering chart', e.srcElement.value);
+  }
+//=============================================================================
+function nodeContent(d, i, arr, state) {
+    if (d.data.class=="department") {
+        hSize = d.depth==0 ? 5 : 7;
+        return `
+            <div class="card text-center department ${d.depth == 0 ? 'text-bg-success' : ''}" style="height:${d.height}px;width:${d.width}px;" > 
     
                 <div class="card-header">
-                    ${d.data.department}
+                    <span>${d.data.department}</span>
                 </div>
                 <div class="card-body">
-                    <div class="manager"> ${d.depth > 1 ? shortFio(d.data.manager) : d.data.manager}</div>
+                    
+                    <h${hSize} class="manager text-truncate"> ${d.depth > 1 ? shortFio(d.data.manager) : d.data.manager}</${hSize}>
                     <!-- <div class=""> ${d.data.id} </div> -->
+                    
                 </div>
-            </div> `;}
+            </div> `
+            ;}
+
     else if (d.data.class=="employee") {return `
-            <div " style="height:${d.height}px;width:${d.width}px;" > ${d.data.name}</div>
+            <div class="card text-center employee rounded-4" style="height:${d.height}px;width:${d.width}px;" data-bs-toggle="tooltip" data-bs-title="Tooltip on top">
+                <div class="position-absolute top-50 start-50 translate-middle w-100"> 
+                    <div class="name text-truncate mx-2">  ${d.data.name} </div>
+                    <div class="title fst-italic text-body-secondary text-truncate mt-1 mx-2">  ${d.data.title} </div>
+                </div>
+             </div>
         `
         };
     };
 //=============================================================================
 function nodeHeight (d) {
-   // console.log (d);
-   if (d.depth==0) return 150
-   else return 100;
+    if (d.data.class=="department") {
+        if (d.depth==0) return 100
+        else return 100;
+    }
+    else if (d.data.class=="employee") {
+        return 50;
+    }
 }
-// function cloneData (data) {
-//     return  {
-//         id: data.id,
-//         parentId: data.parentId,
-//         department: data.department,
-//         manager: data.manager
-//     }
-// }
+
+//=============================================================================
+function nodeWidth (d) {
+    if (d.data.class=="department") {
+        if (d.depth==0) return 350
+        else return 250;
+    }
+    else if (d.data.class=="employee") {
+        return 200;
+    }
+}
 //=============================================================================
 function filterDepartments (arr, rootDeptId) {
     let filteredDept = departments.filter (dept => dept.parentId==rootDeptId );
@@ -102,34 +136,7 @@ function filterDepartments (arr, rootDeptId) {
         arr.push (dept );
         filterDepartments(arr, dept.id);
     });
-
-    // departments.forEach( dept => {
-    //     if ( dept.id==rootDepartmentId  ) {
-    //         let root = { ...dept };
-    //         root.parentId = "";
-    //         arr.push(  root  );
-    //         document.title = root.department;
-    //         //staff.filter ( employee => employee.parentId==dept.id).forEach (employee => arr.push(employee));
-    //         //filterDepartments (arr, dept.id);
-    //     }
-
-    //     else if ( dept.parentId==rootDeptId ) {
-    //         arr.push(  dept  );
-    //         // фильтруем сотрудников департамента и добавляем к массиву
-    //         //staff.filter ( employee => employee.parentId==dept.id).forEach (employee => arr.push(employee));
-    //         //let stf = staff.filter ( employee => employee.parentId==dept.id);
-    //         //arr = arr.concat (stf);
-    //         //if (dept.id != rootDeptId) {   filterDepartments (arr, dept.id); }
-    //         filterDepartments (arr, dept.id);
-    //     };
-    // }); 
-    // let filteredStaff = [];
-    // arr.forEach (dept => {
-    //     if (dept.class=="department"){
-    //         staff.filter ( employee => employee.parentId==dept.id && employee.id!=dept.managerEid).forEach (employee => filteredStaff.push(employee));  
-    //     }
-    // })
-    // return arr;
+  
 }
 //=============================================================================
 function filterStaff (data) {
@@ -142,23 +149,6 @@ function filterStaff (data) {
         }
     }); 
 }
-
-//=============================================================================
-// function detailOrgchart(rootNodeData){
-//     let data = [];
-//     root = cloneData(rootNodeData);
-//     root.parentId = '';
-//     data.push ( root );
-//     filterDepartments(data, rootNodeData );
-//     chartDetails = new d3.OrgChart()
-//     .container(".chart-container-details")
-//     .data(data)
-//     .nodeHeight(nodeHeight)
-//     .nodeContent(nodeContent)
-//     .duration(500)
-// //    .onNodeClick((d) => {       d._expanded = true; chart.render();console.log(d);} )
-//     .render();
-// }
 //=============================================================================
 function onNodeClick (d){
     if (d.data.class=="department") {
@@ -168,12 +158,13 @@ function onNodeClick (d){
     }
 }
 //=============================================================================
-function mainOrgchart(rootDepartmentId=null){
+function drawOrgchart(rootDepartmentId=null){
     var data = [];
     chart = new d3.OrgChart()
     .container(".chart-container")
     .duration(500)
     .nodeHeight(nodeHeight)
+    .nodeWidth(nodeWidth)
     .nodeContent(nodeContent)
     .onNodeClick(onNodeClick)
 
@@ -204,6 +195,10 @@ function mainOrgchart(rootDepartmentId=null){
 //=============================================================================
 // main
 //=============================================================================
+// инициализируем подсказки https://getbootstrap.com/docs/5.3/components/tooltips/
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+//
 rootDepartmentId = window.location.search.replace( '?id=', '');
 d3
     .csv ('./data/staff.csv')
@@ -214,6 +209,6 @@ d3
         .then((data) => {
             data.forEach( item => item.class = 'department');
             departments = data;
-            mainOrgchart(rootDepartmentId);
+            drawOrgchart(rootDepartmentId);
         })
 });

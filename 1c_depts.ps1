@@ -49,43 +49,43 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
     $ds = GetSqlDataSet -sql $sql  -csvExportPath "$csvPath\departments.csv"
     #$ds.Tables[0] | Export-CSV "$csvPath\departments.csv" -notypeinformation -Encoding UTF8 -Force
 
-    $row_count_sql = $DataSet_dept.Tables.Rows.Count
-    for ($i = 0; $i -lt $row_count_sql; $i++) {
+    #$row_count_sql = $DataSet_dept.Tables.Rows.Count
+    #for ($i = 0; $i -lt $row_count_sql; $i++) {
 
         # присваиваем данные столбцов переменным
-        $departmentId = $ds.Tables.Rows[$i].id;
-        Write-Host "$i = $departmentId";
+        #$departmentId = $ds.Tables.Rows[$i].id;
+        #Write-Host "$i = $departmentId";
         #$departmentId = 'A2CF00505601289111E8FEE8322D2240';
-        $sql = "SELECT * FROM (
-                SELECT
-	                'department' as [class]
-	                ,Код_ as id
-	                ,IIF ([Уровень]=0, NULL, CONVERT(nvarchar(100),РодительКод,2)) as parentId
-	                ,Подразделение as [name]
-	                ,РУК.ФИО as title
-	                ,NULL as isManager
-                FROM 
-	                [dbo].[fn1СЗУП_СтруктураПредприятия] (0x$departmentId ) СТР
-                    LEFT JOIN [v1СЗУП_РуководителиПодразделений] РУК ON РУК.СтруктураПредприятияКод=СТР.Код
-	                UNION ALL
-                SELECT
-	                'employee' as class
-	                ,КЛС.КодФизЛица as id
-	                ,CONVERT(nvarchar(100), КЛС.ПодразделениеКод, 2) as parentId
-	                ,КЛС.ФИО as [name]
-	                ,КЛС.Должность as title
-	                ,IIF ( КЛС.КодФизЛица=РУК.КодФизЛица, 1, null ) as isManager
-                FROM 
-	                v1СЗУП_КлассификаторСотрудников_Текущий КЛС
-	                LEFT JOIN v1СЗУП_РуководителиПодразделений РУК ON РУК.СтруктураПредприятияКод=КЛС.ПодразделениеКод
-                WHERE 
-	                [ПодразделениеКод] IN (SELECT [Код] FROM [dbo].[fn1СЗУП_СтруктураПредприятия] ( 0x$departmentId ) ) 
-                    AND (РУК.КодФизЛица IS NULL OR КЛС.КодФизЛица<>РУК.КодФизЛица)
-                ) as SRC ORDER BY class, name
-               ";
-        #Write-Host $sql;
-        #GetSqlDataSet -sql $sql -csvExportPath "$csvPath\$departmentId.csv"
-    }
+    #    $sql = "SELECT * FROM (
+    #            SELECT
+	#                'department' as [class]
+	#                ,Код_ as id
+	#                ,IIF ([Уровень]=0, NULL, CONVERT(nvarchar(100),РодительКод,2)) as parentId
+	#                ,Подразделение as [name]
+	#                ,РУК.ФИО as title
+	#                ,NULL as isManager
+    #            FROM 
+	#                [dbo].[fn1СЗУП_СтруктураПредприятия] (0x$departmentId ) СТР
+    #                LEFT JOIN [v1СЗУП_РуководителиПодразделений] РУК ON РУК.СтруктураПредприятияКод=СТР.Код
+	#                UNION ALL
+    #            SELECT
+	#                'employee' as class
+	#                ,КЛС.КодФизЛица as id
+	#                ,CONVERT(nvarchar(100), КЛС.ПодразделениеКод, 2) as parentId
+	#                ,КЛС.ФИО as [name]
+	#                ,КЛС.Должность as title
+	#                ,IIF ( КЛС.КодФизЛица=РУК.КодФизЛица, 1, null ) as isManager
+    #            FROM 
+	#                v1СЗУП_КлассификаторСотрудников_Текущий КЛС
+	#                LEFT JOIN v1СЗУП_РуководителиПодразделений РУК ON РУК.СтруктураПредприятияКод=КЛС.ПодразделениеКод
+    #            WHERE 
+	#                [ПодразделениеКод] IN (SELECT [Код] FROM [dbo].[fn1СЗУП_СтруктураПредприятия] ( 0x$departmentId ) ) 
+    #                AND (РУК.КодФизЛица IS NULL OR КЛС.КодФизЛица<>РУК.КодФизЛица)
+    #            ) as SRC ORDER BY class, name
+    #           ";
+    #    #Write-Host $sql;
+    #    #GetSqlDataSet -sql $sql -csvExportPath "$csvPath\$departmentId.csv"
+    #}
     #--------------------------------------------------------------------------
     #  все люди
     #--------------------------------------------------------------------------
@@ -95,12 +95,14 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
           ,CONVERT(nvarchar(100), [ПодразделениеКод], 2) as parentId
 	      ,[ФИО] as [name]
           ,[Подразделение] as department
-          ,[Должность] as titel
+          ,[Должность] as title
           ,[СборЗагрузки] as isTimesheet
 	      ,[Филиал] as branch
         FROM
 	        [v1СЗУП_КлассификаторСотрудников_Текущий]
+        ORDER BY
+            [Подразделение]
+            ,[ФИО]
         ";
 
-    GetSqlDataSet -sql $sql -csvExportPath "$csvPath\staff.csv"
- 
+    $ds = GetSqlDataSet -sql $sql -csvExportPath "$csvPath\staff.csv"

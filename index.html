@@ -7,16 +7,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="stylesheet" href="orgchart.css" />
   <link rel="icon" href="favicon.ico">
-  <title>Test d3</title>
+  <title>Оргструктура</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
     crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"></script>
+
 </head>
 
 <body>
@@ -35,14 +39,15 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <button class="btn btn-online-secondary" onclick="mainOrgchart()">Домой</button>
+            <button class="btn btn-online-secondary" onclick="drawOrgchart()">Домой</button>
           </li>
 
           <li class="nav-item">
             <button class="btn btn-online-secondary" onclick="chart.compact(true).render().fit()">Компактно</button>
           </li>
           <li class="nav-item">
-            <button class="btn btn-online-secondary" onclick="chart.compact(false).render().fit()">Горизонтально</button>
+            <button class="btn btn-online-secondary"
+              onclick="chart.compact(false).render().fit()">Горизонтально</button>
           </li>
 
           <li class="nav-item">
@@ -52,19 +57,20 @@
           <li class="nav-item">
             <button class="btn btn-online-secondary" onclick="chart.collapseAll().fit()">Свернуть все</button>
           </li>
- 
 
-          <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Найти..." aria-label="Search">
-          <button class="btn btn-outline-secondary" type="submit">Поиск</button>
-        </form>
+
+          <form class="visually-hidden d-flex" role="search">
+            <input class="form-control me-2" type="search" id="searchinput" placeholder="Найти..." aria-label="Search">
+            <button class="btn btn-outline-secondary" type="submit"
+              onclick="filterChart(document.getElementById('searchinput').value);">Поиск</button>
+          </form>
       </div>
     </div>
   </nav>
 
   <div class="chart-container-details"></div>
   <div class="chart-container"></div>
-  
+
   <script src="orgchart.js"> </script>
 
 </body>
