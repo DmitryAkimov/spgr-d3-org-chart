@@ -40,6 +40,7 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
 	    ,[Подразделение] as department
 	    ,[v1СЗУП_РуководителиПодразделений].ФИО as manager
 	    ,[v1СЗУП_РуководителиПодразделений].КодФизЛица as managerEid
+        ,[СтруктураПредприятия].Уровень as level
     FROM
 	    [fn1СЗУП_СтруктураПредприятия] (default) [СтруктураПредприятия]
 	    LEFT JOIN [v1СЗУП_РуководителиПодразделений] ON [СтруктураПредприятия].Код=v1СЗУП_РуководителиПодразделений.СтруктураПредприятияКод
@@ -47,6 +48,8 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
 	    [Путь]
     ";
     $ds = GetSqlDataSet -sql $sql  -csvExportPath "$csvPath\departments.csv"
+    $count = $ds.Tables.Rows.Count;
+    Write-Host "Подразделения =  $count";
     #$ds.Tables[0] | Export-CSV "$csvPath\departments.csv" -notypeinformation -Encoding UTF8 -Force
 
     #$row_count_sql = $DataSet_dept.Tables.Rows.Count
@@ -91,18 +94,22 @@ function GetSqlDataSet ([string] $sql , [string] $csvExportPath ) {
     #--------------------------------------------------------------------------
     $sql = "
         SELECT 
-          [КодФизлица] as id
-          ,CONVERT(nvarchar(100), [ПодразделениеКод], 2) as parentId
-	      ,[ФИО] as [name]
-          ,[Подразделение] as department
-          ,[Должность] as title
-          ,[СборЗагрузки] as isTimesheet
-	      ,[Филиал] as branch
+            [КодФизлица] as id
+            ,CONVERT(nvarchar(100), [ПодразделениеКод], 2) as parentId
+	        ,[ФИО] as [name]
+            ,[Подразделение] as department
+            ,[Должность] as title
+            ,[СборЗагрузки] as isTimesheet
+            ,[Филиал] as branch
+            ,N'https://bitrix.spgr.ru/company/personal/user/' + CONVERT(nvarchar, vBITRIX_users.ID) + '/' as bitrixUserUrl
         FROM
-	        [v1СЗУП_КлассификаторСотрудников_Текущий]
+            [v1СЗУП_КлассификаторСотрудников_Текущий] КЛС
+            LEFT JOIN vBITRIX_users ON КЛС.КодФизлица=vBITRIX_users.EMPLOYEE_ID
         ORDER BY
             [Подразделение]
             ,[ФИО]
         ";
 
-    $ds = GetSqlDataSet -sql $sql -csvExportPath "$csvPath\staff.csv"
+    $ds = GetSqlDataSet -sql $sql -csvExportPath "$csvPath\staff.csv";
+    $count = $ds.Tables.Rows.Count;
+    Write-Host "Сотрудники = $count" ;

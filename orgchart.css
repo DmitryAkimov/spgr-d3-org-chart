@@ -1,15 +1,12 @@
-.department:hover {
-    background-color:aliceblue ;
-    border: medium solid gray;
+.department:hover, .employee:hover {
+    background:aliceblue ;
+    /* border: medium solid gray; */
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
 }
 
 .employee {
     min-height: 50px;
-}
-
-.employee:hover {
-    background-color:aliceblue ;
-    border: medium solid gray;
 }
 
 .vertical-center {

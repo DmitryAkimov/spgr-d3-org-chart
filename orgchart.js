@@ -55,7 +55,7 @@ function isEmpty( val ) {
 function filterChart(value) {
     // Get input value
     if (isEmpty(value)) {return;}
-    
+
     // Clear previous higlighting
     chart.clearHighlighting();
 
@@ -81,10 +81,22 @@ function filterChart(value) {
   }
 //=============================================================================
 function nodeContent(d, i, arr, state) {
+    var nodeClass = "";
     if (d.data.class=="department") {
         hSize = d.depth==0 ? 5 : 7;
+        
+        if (d.data.level==0) {
+            nodeClass = "text-bg-success"; // ГК Спектрум - самый высокий root
+        }
+        else if (d.depth == 0 ) {
+            nodeClass = "bg-warning-subtle"; // первый элемент на детальной диаграмме
+        }
+        else {
+            nodeClass = ""; // обычное подразделение
+        }
+
         return `
-            <div class="card text-center department ${d.depth == 0 ? 'text-bg-success' : ''}" style="height:${d.height}px;width:${d.width}px;" > 
+            <div class="card text-center department ${nodeClass}" style="height:${d.height}px;width:${d.width}px;" > 
     
                 <div class="card-header">
                     <span>${d.data.department}</span>
@@ -98,12 +110,26 @@ function nodeContent(d, i, arr, state) {
             </div> `
             ;}
 
-    else if (d.data.class=="employee") {return `
-            <div class="card text-center employee rounded-4" style="height:${d.height}px;width:${d.width}px;" data-bs-toggle="tooltip" data-bs-title="Tooltip on top">
+    else if (d.data.class=="employee") {
+        let branchClass = "bg-secondary";
+        switch (String(d.data.branch).toUpperCase()) {
+            case "МСК":
+                branchClass="bg-success-subtle"; break;
+            case "СПБ":
+                branchClass="bg-primary-subtle"; break;
+            case "НСК":
+                branchClass="bg-warning-subtle"; break;
+          }
+        branchClass += " text-secondary";
+        return `
+            <div class="card text-center employee rounded-4 position-relative" style="height:${d.height}px;width:${d.width}px;" data-bs-toggle="tooltip" data-bs-title="Tooltip on top">
                 <div class="position-absolute top-50 start-50 translate-middle w-100"> 
                     <div class="name text-truncate mx-2">  ${d.data.name} </div>
                     <div class="title fst-italic text-body-secondary text-truncate mt-1 mx-2">  ${d.data.title} </div>
                 </div>
+
+                <div class="badge position-absolute ${branchClass} top-100 start-100 translate-middle"  style="width:3.5em;">${d.data.branch}</div>
+                
              </div>
         `
         };
@@ -155,7 +181,10 @@ function onNodeClick (d){
         if (d.depth > 0) {
             window.open(`index.html?id=${d.data.id}`, '_blank') ;
         }
+    } else if (d.data.class=="employee" && "bitrixUserUrl" in d.data) {
+        window.open(`${d.data.bitrixUserUrl}`, '_blank') ;
     }
+
 }
 //=============================================================================
 function drawOrgchart(rootDepartmentId=null){
